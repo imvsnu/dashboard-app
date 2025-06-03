@@ -1,3 +1,5 @@
+live: https://jade-peony-21b7ba.netlify.app
+
 ### Dependency versions
 - nvm: 0.39.3
 - node: 22.16.0
