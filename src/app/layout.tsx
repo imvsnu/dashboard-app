@@ -1,5 +1,6 @@
 import './globals.css'
 import type { Metadata } from 'next'
+import Providers from '@/lib/Providers';
 import Sidebar from '@/components/Sidebar'
 
 export const metadata: Metadata = {
@@ -14,7 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Sidebar />
 
         <main className="flex-1 p-4 pt-[72px] md:pt-4">
-          {children}
+          <Providers>{children}</Providers>
         </main>
       </body>
     </html>
