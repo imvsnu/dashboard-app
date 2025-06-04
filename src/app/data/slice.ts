@@ -1,26 +1,34 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-type Data = {
+export type Product = {
   id: number;
   title: string;
-  body: string;
+  category: string
+  price: number;
+  brand: string;
+  thumbnail: string;
+  rating: string
+};
+
+type Data = {
+  products?: Product[];
 };
 
 type DataState = {
-  data: Data[];
+  data: Data;
   loading: boolean;
   error: string | null;
 };
 
 const initialState: DataState = {
-  data: [],
+  data: { products: [] },
   loading: false,
   error: null,
 };
 
 export const fetchData = createAsyncThunk('data/fetchData', async () => {
-  const response = await axios.get('https://jsonplaceholder.typicode.com/todos');
+  const response = await axios.get('https://dummyjson.com/products');
   return response.data;
 });
 

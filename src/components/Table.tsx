@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import Image from 'next/image';
 
 export type TableColumn<T extends object> = {
   key: keyof T;
@@ -96,16 +97,30 @@ export function Table<T extends object>({
             ))}
           </tr>
         </thead>
+
         <tbody>
           {paginatedData.map((row, rowIndex) => (
             <tr key={rowIndex} className="hover:bg-gray-50">
               {columns.map((col) => (
                 <td key={String(col.key)} className={`p-3 border-b border-gray-200 text-gray-600 ${col.width ?? ''}`}>
-                  {String(row[col.key])}
+                  {String(row[col.key]) !== 'undefined' ? (
+                      String(row[col.key]).endsWith('.webp') ?
+                      <Image
+                        className="object-contain"
+                        src={row[col.key] as string}
+                        alt={col.label}
+                        width={36}
+                        height={24}
+                      />
+                    : String(row[col.key])
+                  ) : (
+                    <span className="text-gray-400">N/A</span>
+                  )}
                 </td>
               ))}
             </tr>
           ))}
+
           {paginatedData.length === 0 && (
             <tr>
               <td colSpan={columns.length} className="p-4 text-center text-gray-500">
