@@ -1,3 +1,10 @@
+'use client';
+
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchData } from './slice';
+import { RootState, AppDispatch } from '@/lib/store';
+
 import { Table, TableColumn } from '@/components/Table';
 
 type User = {
@@ -23,6 +30,17 @@ const columns: TableColumn<User>[] = [
 
 
 export default function DataPage() {
+  const dispatch = useDispatch<AppDispatch>();
+  const { data, loading, error } = useSelector((state: RootState) => state.data);
+
+  console.log('Data:', data);
+  console.log('Loading:', loading);
+  console.log('Error:', error);
+
+  useEffect(() => {
+    dispatch(fetchData());
+  }, [dispatch]);
+
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <h1 className="text-2xl font-semibold mb-4">Data</h1>
