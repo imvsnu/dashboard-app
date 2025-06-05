@@ -1,6 +1,7 @@
-'use client';
+"use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from "react";
+import StarRatings from "react-star-ratings";
 
 export type TableColumn<T extends object> = {
   key: keyof T;
@@ -18,6 +19,7 @@ interface TableProps<T extends object> {
   };
   pageSize?: number;
   total: number;
+  page: number;
   onPageChange?: (newPage: number, newSkip: number) => void;
 }
 
@@ -31,8 +33,8 @@ export function Table<T extends object>({
   onPageChange,
   page = 1,
 }: TableProps<T>) {
-  const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState('All');
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("All");
 
   const filteredData = useMemo(() => {
     let filtered = data;
@@ -43,7 +45,7 @@ export function Table<T extends object>({
       );
     }
 
-    if (filterOptions && filter !== 'All') {
+    if (filterOptions && filter !== "All") {
       filtered = filtered.filter((item) => item[filterOptions.key] === filter);
     }
 
@@ -52,6 +54,7 @@ export function Table<T extends object>({
 
   const handlePageChange = (changeFn: (currentPage: number) => number) => {
     const newPage = changeFn(page);
+    if (!onPageChange) return;
     onPageChange(newPage, (newPage - 1) * pageSize);
   };
 
@@ -90,7 +93,12 @@ export function Table<T extends object>({
         <thead>
           <tr className="bg-gray-100 text-left">
             {columns.map((col) => (
-              <th key={String(col.key)} className={`p-3 border-b border-gray-200 text-gray-600 ${col.width ?? ''}`}>
+              <th
+                key={String(col.key)}
+                className={`p-3 border-b border-gray-200 text-gray-600 ${
+                  col.width ?? ""
+                }`}
+              >
                 {col.label}
               </th>
             ))}
@@ -100,21 +108,46 @@ export function Table<T extends object>({
         <tbody>
           {filteredData.map((row, rowIndex) => (
             <tr key={rowIndex} className="hover:bg-gray-50">
-              {columns.map((col) => (
-                <td key={String(col.key)} className={`p-3 border-b border-gray-200 text-gray-600 ${col.width ?? ''}`}>
-                  {String(row[col.key]) !== 'undefined' ? (
-                      String(row[col.key])
-                  ) : (
-                    <span className="text-gray-400">N/A</span>
-                  )}
-                </td>
-              ))}
+              {columns.map((col) => {
+                console.log(col.key, row);
+                return (
+                  <td
+                    key={String(col.key)}
+                    className={`p-3 border-b border-gray-200 text-gray-600 ${
+                      col.width ?? ""
+                    }`}
+                  >
+                    {String(row[col.key]) !== "undefined" ? (
+                      col.key === "rating" ? (
+                        <StarRatings
+                          rating={row[col.key] as number}
+                          starRatedColor="orange"
+                          starDimension="20px"
+                          starSpacing="0px"
+                        />
+                      ) : col.key === "price" ? (
+                        (row[col.key] as number).toLocaleString("en-US", {
+                          style: "currency",
+                          currency: "USD",
+                        })
+                      ) : (
+                        String(row[col.key])
+                      )
+                    ) : (
+                      <span className="text-gray-400">N/A</span>
+                    )}
+                  </td>
+                );
+              })}
             </tr>
           ))}
 
           {filteredData.length === 0 && (
             <tr>
-              <td colSpan={columns.length} className="p-4 text-center text-gray-500">
+              <td
+                colSpan={columns.length}
+                className="p-4 text-center text-gray-500"
+              >
                 No data found.
               </td>
             </tr>

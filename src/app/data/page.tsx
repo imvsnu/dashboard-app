@@ -36,11 +36,11 @@ const CATEGORIES = [
 
 const columns: TableColumn<Product>[] = [
   { key: "id", label: "ID", width: "w-16" },
-  { key: "title", label: "Title", width: "w-16" },
+  { key: "title", label: "Title", width: "w-24" },
   { key: "category", label: "Category", width: "w-16" },
-  { key: "price", label: "Price", width: "w-16" },
+  { key: "price", label: "Price", width: "w-8" },
+  { key: "brand", label: "Brand", width: "w-8" },
   { key: "rating", label: "Rating", width: "w-16" },
-  { key: "brand", label: "Brand", width: "w-16" },
 ];
 
 export default function DataPage() {
@@ -51,7 +51,7 @@ export default function DataPage() {
   );
 
   useEffect(() => {
-    dispatch(fetchData());
+    dispatch(fetchData({ skip: 0 }));
   }, [dispatch]);
 
   if (loading) {
