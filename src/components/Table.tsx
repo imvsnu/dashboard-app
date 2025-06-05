@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { useState, useMemo } from 'react';
-import Image from 'next/image';
+import React, { useState, useMemo } from "react";
+import StarRatings from "react-star-ratings";
 
 export type TableColumn<T extends object> = {
   key: keyof T;
@@ -18,6 +18,9 @@ interface TableProps<T extends object> {
     values: Array<T[keyof T] & string>;
   };
   pageSize?: number;
+  total: number;
+  page: number;
+  onPageChange?: (newPage: number, newSkip: number) => void;
 }
 
 export function Table<T extends object>({
@@ -25,11 +28,13 @@ export function Table<T extends object>({
   columns,
   searchableKey,
   filterOptions,
-  pageSize = 5,
+  pageSize = 10,
+  total: totalPages,
+  onPageChange,
+  page = 1,
 }: TableProps<T>) {
-  const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState('All');
-  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("All");
 
   const filteredData = useMemo(() => {
     let filtered = data;
@@ -40,19 +45,18 @@ export function Table<T extends object>({
       );
     }
 
-    if (filterOptions && filter !== 'All') {
+    if (filterOptions && filter !== "All") {
       filtered = filtered.filter((item) => item[filterOptions.key] === filter);
     }
 
     return filtered;
   }, [data, search, filter, searchableKey, filterOptions]);
 
-  const paginatedData = useMemo(() => {
-    const start = (page - 1) * pageSize;
-    return filteredData.slice(start, start + pageSize);
-  }, [filteredData, page, pageSize]);
-
-  const totalPages = Math.ceil(filteredData.length / pageSize);
+  const handlePageChange = (changeFn: (currentPage: number) => number) => {
+    const newPage = changeFn(page);
+    if (!onPageChange) return;
+    onPageChange(newPage, (newPage - 1) * pageSize);
+  };
 
   return (
     <div className="w-full space-y-4">
@@ -64,7 +68,6 @@ export function Table<T extends object>({
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
-              setPage(1);
             }}
           />
         )}
@@ -74,7 +77,6 @@ export function Table<T extends object>({
             value={filter}
             onChange={(e) => {
               setFilter(e.target.value);
-              setPage(1);
             }}
           >
             <option value="All">All</option>
@@ -91,7 +93,12 @@ export function Table<T extends object>({
         <thead>
           <tr className="bg-gray-100 text-left">
             {columns.map((col) => (
-              <th key={String(col.key)} className={`p-3 border-b border-gray-200 text-gray-600 ${col.width ?? ''}`}>
+              <th
+                key={String(col.key)}
+                className={`p-3 border-b border-gray-200 text-gray-600 ${
+                  col.width ?? ""
+                }`}
+              >
                 {col.label}
               </th>
             ))}
@@ -99,31 +106,48 @@ export function Table<T extends object>({
         </thead>
 
         <tbody>
-          {paginatedData.map((row, rowIndex) => (
+          {filteredData.map((row, rowIndex) => (
             <tr key={rowIndex} className="hover:bg-gray-50">
-              {columns.map((col) => (
-                <td key={String(col.key)} className={`p-3 border-b border-gray-200 text-gray-600 ${col.width ?? ''}`}>
-                  {String(row[col.key]) !== 'undefined' ? (
-                      String(row[col.key]).endsWith('.webp') ?
-                      <Image
-                        className="object-contain"
-                        src={row[col.key] as string}
-                        alt={col.label}
-                        width={36}
-                        height={24}
-                      />
-                    : String(row[col.key])
-                  ) : (
-                    <span className="text-gray-400">N/A</span>
-                  )}
-                </td>
-              ))}
+              {columns.map((col) => {
+                console.log(col.key, row);
+                return (
+                  <td
+                    key={String(col.key)}
+                    className={`p-3 border-b border-gray-200 text-gray-600 ${
+                      col.width ?? ""
+                    }`}
+                  >
+                    {String(row[col.key]) !== "undefined" ? (
+                      col.key === "rating" ? (
+                        <StarRatings
+                          rating={row[col.key] as number}
+                          starRatedColor="orange"
+                          starDimension="20px"
+                          starSpacing="0px"
+                        />
+                      ) : col.key === "price" ? (
+                        (row[col.key] as number).toLocaleString("en-US", {
+                          style: "currency",
+                          currency: "USD",
+                        })
+                      ) : (
+                        String(row[col.key])
+                      )
+                    ) : (
+                      <span className="text-gray-400">N/A</span>
+                    )}
+                  </td>
+                );
+              })}
             </tr>
           ))}
 
-          {paginatedData.length === 0 && (
+          {filteredData.length === 0 && (
             <tr>
-              <td colSpan={columns.length} className="p-4 text-center text-gray-500">
+              <td
+                colSpan={columns.length}
+                className="p-4 text-center text-gray-500"
+              >
                 No data found.
               </td>
             </tr>
@@ -137,16 +161,16 @@ export function Table<T extends object>({
         </span>
         <div className="flex gap-2">
           <button
-            onClick={() => setPage((p) => Math.max(p - 1, 1))}
+            onClick={() => handlePageChange((p) => Math.max(p - 1, 1))}
             disabled={page === 1}
-            className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50"
+            className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50 cursor-pointer"
           >
             Prev
           </button>
           <button
-            onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+            onClick={() => handlePageChange((p) => Math.min(p + 1, totalPages))}
             disabled={page === totalPages}
-            className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50"
+            className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50 cursor-pointer"
           >
             Next
           </button>

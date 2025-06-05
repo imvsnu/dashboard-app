@@ -1,33 +1,65 @@
-'use client';
+"use client";
 
-import _ from 'lodash';
-import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchData, Product } from './slice';
-import { RootState, AppDispatch } from '@/lib/store';
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchData, Product } from "./slice";
+import { RootState, AppDispatch } from "@/lib/store";
 
-import { Table, TableColumn } from '@/components/Table';
+import { Table, TableColumn } from "@/components/Table";
+
+const CATEGORIES = [
+  "beauty",
+  "fragrances",
+  "furniture",
+  "groceries",
+  "home-decoration",
+  "kitchen-accessories",
+  "laptops",
+  "mens-shirts",
+  "mens-shoes",
+  "mens-watches",
+  "mobile-accessories",
+  "motorcycle",
+  "skin-care",
+  "smartphones",
+  "sports-accessories",
+  "sunglasses",
+  "tablets",
+  "tops",
+  "vehicle",
+  "womens-bags",
+  "womens-dresses",
+  "womens-jewellery",
+  "womens-shoes",
+  "womens-watches",
+];
 
 const columns: TableColumn<Product>[] = [
-  { key: 'id', label: 'ID', width: 'w-16' },
-  { key: 'title', label: 'Title', width: 'w-16' },
-  { key: 'category', label: 'Category', width: 'w-16' },
-  { key: 'price', label: 'Price', width: 'w-16' },
-  { key: 'rating', label: 'Rating', width: 'w-16' },
-  { key: 'brand', label: 'Brand', width: 'w-16' },
-  { key: 'thumbnail', label: 'Thumbnail', width: 'w-16' },
+  { key: "id", label: "ID", width: "w-16" },
+  { key: "title", label: "Title", width: "w-24" },
+  { key: "category", label: "Category", width: "w-16" },
+  { key: "price", label: "Price", width: "w-8" },
+  { key: "brand", label: "Brand", width: "w-8" },
+  { key: "rating", label: "Rating", width: "w-16" },
 ];
 
 export default function DataPage() {
   const dispatch = useDispatch<AppDispatch>();
-  const { data, loading, error } = useSelector((state: RootState) => state.data);
+  const [page, setPage] = useState(1);
+  const { data, loading, error } = useSelector(
+    (state: RootState) => state.data
+  );
 
   useEffect(() => {
-    dispatch(fetchData());
+    dispatch(fetchData({ skip: 0 }));
   }, [dispatch]);
 
   if (loading) {
-    return <div className="text-center">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center text-lg font-medium">Loading...</div>
+      </div>
+    );
   }
 
   if (error) {
@@ -41,9 +73,16 @@ export default function DataPage() {
         data={data.products || []}
         columns={columns}
         searchableKey="title"
-        filterOptions={{ key: 'category', values: _.uniq(data.products?.map((item: Product) => item.category) ?? []) }}
-        pageSize={10}
+        filterOptions={{ key: "category", values: CATEGORIES }}
+        pageSize={data.limit}
+        total={data.total}
+        page={page}
+        onPageChange={(newPage, newSkip) => {
+          console.log({ newPage, newSkip });
+          setPage(newPage);
+          dispatch(fetchData({ skip: newSkip }));
+        }}
       />
     </div>
-  )
+  );
 }

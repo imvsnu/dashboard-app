@@ -13,6 +13,9 @@ export type Product = {
 
 type Data = {
   products?: Product[];
+  limit: number;
+  skip: number;
+  total: number;
 };
 
 type DataState = {
@@ -22,15 +25,18 @@ type DataState = {
 };
 
 const initialState: DataState = {
-  data: { products: [] },
+  data: { products: [], limit: 12, skip: 0, total: 0 },
   loading: false,
   error: null,
 };
 
-export const fetchData = createAsyncThunk('data/fetchData', async () => {
-  const response = await axios.get('https://dummyjson.com/products');
-  return response.data;
-});
+export const fetchData = createAsyncThunk(
+  'data/fetchData',
+  async ({ skip }: { skip: number }) => {
+    const response = await axios.get(`https://dummyjson.com/products?limit=12&skip=${skip}`);
+    return response.data;
+  }
+);
 
 const dataSlice = createSlice({
   name: 'data',
