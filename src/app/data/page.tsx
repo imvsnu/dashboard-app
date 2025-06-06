@@ -35,7 +35,7 @@ const CATEGORIES: Product["category"][] = [
 
 const columns: TableColumn<Product>[] = [
   { key: "id", label: "ID", width: "w-8" },
-  { key: "title", label: "Title", width: "w-32" },
+  { key: "title", label: "Title", width: "w-40" },
   { key: "category", label: "Category", width: "w-8" },
   { key: "price", label: "Price", width: "w-8" },
   { key: "brand", label: "Brand", width: "w-8" },

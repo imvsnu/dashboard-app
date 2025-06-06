@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, ChangeEvent, KeyboardEvent } from "react";
 import StarRatings from "react-star-ratings";
+import { Search } from "lucide-react";
 import styles from "./Table.module.css";
 
 export type TableColumn<T extends object> = {
@@ -63,11 +64,15 @@ export function Table<T extends object>({
 
   const handleSearchEnter = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      setPage(1);
-      setFilter("");
-      onSearch?.(search);
+      handleSearch();
     }
   };
+
+  const handleSearch = () => {
+    setPage(1);
+    setFilter("");
+    onSearch?.(search);
+  }
 
   const handleFilterChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
@@ -106,15 +111,19 @@ export function Table<T extends object>({
     <div className="w-full space-y-4">
       <div className="flex flex-wrap items-center gap-4">
         {searchableKey && (
-          <input
-            className="border border-gray-300 px-3 py-2 rounded text-gray-700 w-full max-w-xs text-sm"
-            placeholder={`Search by ${String(
-              searchableKey
-            )}... (type and press enter)`}
-            value={search}
-            onChange={handleSearchChange}
-            onKeyDown={handleSearchEnter}
-          />
+          <div className="relative w-full max-w-xs">
+            <input
+              className="border border-gray-300 px-3 py-2 rounded text-gray-700 w-full max-w-xs text-sm"
+              placeholder={`Search by ${String(
+                searchableKey
+              )}...`}
+              value={search}
+              onChange={handleSearchChange}
+              onKeyDown={handleSearchEnter}
+            />
+
+            <Search onClick={handleSearch} className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 cursor-pointer" />
+          </div>
         )}
 
         {filterOptions && (
@@ -142,7 +151,9 @@ export function Table<T extends object>({
         )}
       </div>
 
-      <div className={`overflow-x-auto md:overflow-x-visible rounded border border-gray-200 shadow bg-white ${styles.tableContainer}`}>
+      <div
+        className={`overflow-x-auto md:overflow-x-visible rounded border border-gray-200 shadow bg-white ${styles.tableContainer}`}
+      >
         <table className="min-w-full">
           {!loading && (
             <thead>
