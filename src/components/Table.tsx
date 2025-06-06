@@ -35,7 +35,7 @@ export function Table<T extends object>({
   onPageChange,
   onSearch,
   loading = false,
-  onFilter
+  onFilter,
 }: TableProps<T>) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("");
@@ -54,54 +54,60 @@ export function Table<T extends object>({
 
   return (
     <div className="w-full space-y-4">
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4">
         {searchableKey && (
           <input
-            className="border border-gray-200 px-3 py-2 rounded w-full max-w-sm"
+            className="border border-gray-300 px-3 py-2 rounded text-gray-700 w-full max-w-xs"
             placeholder={`Search by ${String(
               searchableKey
             )}... (type and press enter)`}
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
-              if (e.target.value == "") {
-                if (onSearch) {
-                  onSearch("");
-                }
+              if (e.target.value === "") {
+                if (onSearch) onSearch("");
                 setPage(1);
               }
             }}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
-                if (onSearch) {
-                  onSearch(search);
-                }
+                if (onSearch) onSearch(search);
                 setPage(1);
                 setFilter("");
               }
             }}
           />
         )}
+
         {filterOptions && (
-          <select
-            className="border border-gray-200 px-3 py-2 rounded text-gray-600"
-            value={filter}
-            onChange={(e) => {
-              setFilter(e.target.value);
-              if (onFilter) {
-                onFilter(e.target.value);
-                setSearch("");
-              }
-              setPage(1);
-            }}
-          >
-            <option value="">All</option>
-            {filterOptions.values.map((v) => (
-              <option key={v} value={v}>
-                {v}
-              </option>
-            ))}
-          </select>
+          <div className="flex items-center gap-2">
+            <label
+              htmlFor="categoryFilter"
+              className="text-sm font-medium text-gray-700 whitespace-nowrap"
+            >
+              Filter by category
+            </label>
+            <select
+              id="categoryFilter"
+              className="border border-gray-300 px-3 py-2 rounded text-gray-700"
+              value={filter}
+              onChange={(e) => {
+                setFilter(e.target.value);
+                if (onFilter) {
+                  onFilter(e.target.value);
+                  setSearch("");
+                }
+                setPage(1);
+              }}
+            >
+              <option value="">All</option>
+              {filterOptions.values.map((v) => (
+                <option key={v} value={v}>
+                  {v}
+                </option>
+              ))}
+            </select>
+          </div>
         )}
       </div>
 
