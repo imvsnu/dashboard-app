@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, ChangeEvent, KeyboardEvent } from "react";
 import StarRatings from "react-star-ratings";
 
 export type TableColumn<T extends object> = {
@@ -26,82 +26,118 @@ interface TableProps<T extends object> {
 }
 
 export function Table<T extends object>({
-  data: filteredData,
+  data,
   columns,
   searchableKey,
   filterOptions,
   pageSize = 10,
   total,
+  loading = false,
   onPageChange,
   onSearch,
-  loading = false,
-  onFilter
+  onFilter,
 }: TableProps<T>) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("");
   const [page, setPage] = useState(1);
 
-  const totalPages = useMemo(() => {
-    return Math.ceil(total / pageSize);
-  }, [total, pageSize]);
+  const totalPages = useMemo(
+    () => Math.ceil(total / pageSize),
+    [total, pageSize]
+  );
 
-  const handlePageChange = (changeFn: (currentPage: number) => number) => {
-    const newPage = changeFn(page);
+  const updatePage = (newPage: number) => {
     setPage(newPage);
-    if (!onPageChange) return;
-    onPageChange((newPage - 1) * pageSize, search, filter);
+    onPageChange?.((newPage - 1) * pageSize, search, filter);
+  };
+
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearch(value);
+    if (value === "") {
+      setPage(1);
+      onSearch?.("");
+    }
+  };
+
+  const handleSearchEnter = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      setPage(1);
+      setFilter("");
+      onSearch?.(search);
+    }
+  };
+
+  const handleFilterChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setFilter(value);
+    setPage(1);
+    setSearch("");
+    onFilter?.(value);
+  };
+
+  const renderCell = (key: keyof T, value: T[keyof T]) => {
+    if (value === undefined || value === null)
+      return <span className="text-gray-400">N/A</span>;
+
+    if (key === "rating" && typeof value === "number") {
+      return (
+        <StarRatings
+          rating={value}
+          starRatedColor="orange"
+          starDimension="20px"
+          starSpacing="0px"
+        />
+      );
+    }
+
+    if (key === "price" && typeof value === "number") {
+      return value.toLocaleString("en-US", {
+        style: "currency",
+        currency: "USD",
+      });
+    }
+
+    return String(value);
   };
 
   return (
     <div className="w-full space-y-4">
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4">
         {searchableKey && (
           <input
-            className="border border-gray-200 px-3 py-2 rounded w-full max-w-sm"
+            className="border border-gray-300 px-3 py-2 rounded text-gray-700 w-full max-w-xs"
             placeholder={`Search by ${String(
               searchableKey
             )}... (type and press enter)`}
             value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              if (e.target.value == "") {
-                if (onSearch) {
-                  onSearch("");
-                }
-                setPage(1);
-              }
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                if (onSearch) {
-                  onSearch(search);
-                }
-                setPage(1);
-                setFilter("");
-              }
-            }}
+            onChange={handleSearchChange}
+            onKeyDown={handleSearchEnter}
           />
         )}
+
         {filterOptions && (
-          <select
-            className="border border-gray-200 px-3 py-2 rounded text-gray-600"
-            value={filter}
-            onChange={(e) => {
-              setFilter(e.target.value);
-              if (onFilter) {
-                onFilter(e.target.value);
-                setSearch("");
-              }
-              setPage(1);
-            }}
-          >
-            <option value="">All</option>
-            {filterOptions.values.map((v) => (
-              <option key={v} value={v}>
-                {v}
-              </option>
-            ))}
-          </select>
+          <div className="flex items-center gap-2">
+            <label
+              htmlFor="categoryFilter"
+              className="text-sm font-medium text-gray-700 whitespace-nowrap"
+            >
+              Filter by category
+            </label>
+            <select
+              id="categoryFilter"
+              className="border border-gray-300 px-3 py-2 rounded text-gray-700"
+              value={filter}
+              onChange={handleFilterChange}
+            >
+              <option value="">All</option>
+              {filterOptions.values.map((v) => (
+                <option key={v} value={v}>
+                  {v}
+                </option>
+              ))}
+            </select>
+          </div>
         )}
       </div>
 
@@ -134,7 +170,7 @@ export function Table<T extends object>({
                 </div>
               </td>
             </tr>
-          ) : filteredData.length === 0 ? (
+          ) : data.length === 0 ? (
             <tr>
               <td
                 colSpan={columns.length}
@@ -144,7 +180,7 @@ export function Table<T extends object>({
               </td>
             </tr>
           ) : (
-            filteredData.map((row, rowIndex) => (
+            data.map((row, rowIndex) => (
               <tr key={rowIndex} className="hover:bg-gray-50">
                 {columns.map((col) => (
                   <td
@@ -153,25 +189,7 @@ export function Table<T extends object>({
                       col.width ?? ""
                     }`}
                   >
-                    {typeof row[col.key] !== "undefined" ? (
-                      col.key === "rating" ? (
-                        <StarRatings
-                          rating={row[col.key] as number}
-                          starRatedColor="orange"
-                          starDimension="20px"
-                          starSpacing="0px"
-                        />
-                      ) : col.key === "price" ? (
-                        (row[col.key] as number).toLocaleString("en-US", {
-                          style: "currency",
-                          currency: "USD",
-                        })
-                      ) : (
-                        String(row[col.key])
-                      )
-                    ) : (
-                      <span className="text-gray-400">N/A</span>
-                    )}
+                    {renderCell(col.key, row[col.key])}
                   </td>
                 ))}
               </tr>
@@ -186,14 +204,14 @@ export function Table<T extends object>({
         </span>
         <div className="flex gap-2">
           <button
-            onClick={() => handlePageChange((p) => Math.max(p - 1, 1))}
+            onClick={() => updatePage(Math.max(page - 1, 1))}
             disabled={page === 1}
             className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50 cursor-pointer"
           >
             Prev
           </button>
           <button
-            onClick={() => handlePageChange((p) => Math.min(p + 1, totalPages))}
+            onClick={() => updatePage(Math.min(page + 1, totalPages))}
             disabled={page === totalPages}
             className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50 cursor-pointer"
           >

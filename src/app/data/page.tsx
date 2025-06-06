@@ -4,10 +4,9 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchData, Product } from "./slice";
 import { RootState, AppDispatch } from "@/lib/store";
-
 import { Table, TableColumn } from "@/components/Table";
 
-const CATEGORIES = [
+const CATEGORIES: Product["category"][] = [
   "beauty",
   "fragrances",
   "furniture",
@@ -53,13 +52,19 @@ export default function DataPage() {
     dispatch(fetchData({ skip: 0 }));
   }, [dispatch]);
 
+  const handleFetch = (
+    params: Partial<{ skip: number; search: string; category: string }>
+  ) => {
+    dispatch(fetchData(params));
+  };
+
   if (error) {
     return <div className="text-center text-red-500">{error}</div>;
   }
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
-      <h1 className="text-2xl font-semibold mb-4">Data</h1>
+      <h1 className="text-2xl font-semibold mb-4">Data Table</h1>
       <Table
         data={data.products || []}
         columns={columns}
@@ -68,15 +73,11 @@ export default function DataPage() {
         pageSize={12}
         total={data.total}
         loading={loading}
-        onSearch={(search) =>
-          dispatch(fetchData({ search: search }))
+        onSearch={(search) => handleFetch({ search })}
+        onFilter={(category) => handleFetch({ category })}
+        onPageChange={(skip, search, category) =>
+          handleFetch({ skip, search, category })
         }
-        onFilter={(category) =>
-          dispatch(fetchData({ category: category }))
-        }
-        onPageChange={(skip, search, category) => {
-          dispatch(fetchData({ skip: skip, search: search, category: category }));
-        }}
       />
     </div>
   );

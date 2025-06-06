@@ -2,12 +2,13 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Database, Menu } from 'lucide-react'
+import { Home, Database, Menu, Info } from 'lucide-react'
 import { useState } from 'react'
 
 const navItems = [
   { name: 'Home', href: '/', icon: Home },
   { name: 'Data', href: '/data', icon: Database },
+  { name: 'About Us', href: '/about-us', icon: Info },
 ]
 
 export default function Sidebar() {
@@ -24,7 +25,11 @@ export default function Sidebar() {
         >
           <Menu className="w-5 h-5" />
         </button>
-        <h1 className="text-lg font-semibold text-blue-600 ml-28">Dashboard</h1>
+        <h1 className="text-lg font-semibold text-blue-600 ml-28">
+          <Link href="/">
+            Dashboard
+          </Link>
+        </h1>
       </div>
 
       {/* Sidebar */}
@@ -34,7 +39,11 @@ export default function Sidebar() {
           md:translate-x-0 md:static md:inset-auto`}
       >
         <div className="p-6 border-b border-gray-200 hidden md:block">
-          <h1 className="text-xl font-semibold text-blue-600 tracking-tight">Dashboard</h1>
+          <h1 className="text-xl font-semibold text-blue-600 tracking-tight">
+            <Link href="/">
+              Dashboard
+            </Link>
+          </h1>
         </div>
 
         <nav className="flex flex-col gap-1 p-4 mt-14 md:mt-0">
