@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, ChangeEvent, KeyboardEvent } from "react";
 import StarRatings from "react-star-ratings";
+import styles from "./Table.module.css";
 
 export type TableColumn<T extends object> = {
   key: keyof T;
@@ -141,62 +142,64 @@ export function Table<T extends object>({
         )}
       </div>
 
-      <table className="min-w-full bg-white border border-gray-200 shadow rounded">
-        {!loading && (
-          <thead>
-            <tr className="bg-gray-100 text-left">
-              {columns.map((col) => (
-                <th
-                  key={String(col.key)}
-                  className={`p-3 border-b border-gray-200 text-gray-600 ${
-                    col.width ?? ""
-                  }`}
-                >
-                  {col.label}
-                </th>
-              ))}
-            </tr>
-          </thead>
-        )}
-
-        <tbody>
-          {loading ? (
-            <tr>
-              <td colSpan={columns.length}>
-                <div className="flex items-center justify-center h-159">
-                  <div className="text-center text-lg font-medium">
-                    Loading...
-                  </div>
-                </div>
-              </td>
-            </tr>
-          ) : data.length === 0 ? (
-            <tr>
-              <td
-                colSpan={columns.length}
-                className="p-4 text-center text-gray-500"
-              >
-                No data found.
-              </td>
-            </tr>
-          ) : (
-            data.map((row, rowIndex) => (
-              <tr key={rowIndex} className="hover:bg-gray-50">
+      <div className={`overflow-x-auto md:overflow-x-visible rounded border border-gray-200 shadow bg-white ${styles.tableContainer}`}>
+        <table className="min-w-full">
+          {!loading && (
+            <thead>
+              <tr className="bg-gray-100 text-left">
                 {columns.map((col) => (
-                  <td
+                  <th
                     key={String(col.key)}
                     className={`p-3 border-b border-gray-200 text-gray-600 ${
                       col.width ?? ""
                     }`}
                   >
-                    {renderCell(col.key, row[col.key])}
-                  </td>
+                    {col.label}
+                  </th>
                 ))}
               </tr>
-            ))
+            </thead>
           )}
-        </tbody>
-      </table>
+
+          <tbody>
+            {loading ? (
+              <tr>
+                <td colSpan={columns.length}>
+                  <div className="flex items-center justify-center h-159">
+                    <div className="text-center text-lg font-medium">
+                      Loading...
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            ) : data.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={columns.length}
+                  className="p-4 text-center text-gray-500"
+                >
+                  No data found.
+                </td>
+              </tr>
+            ) : (
+              data.map((row, rowIndex) => (
+                <tr key={rowIndex} className="hover:bg-gray-50">
+                  {columns.map((col) => (
+                    <td
+                      key={String(col.key)}
+                      className={`p-3 border-b border-gray-200 text-gray-600 ${
+                        col.width ?? ""
+                      }`}
+                    >
+                      {renderCell(col.key, row[col.key])}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
 
       <div className="flex justify-between items-center">
         <span className="text-sm text-gray-600">
