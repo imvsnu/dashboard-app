@@ -61,7 +61,14 @@ export default function DataPage() {
   if (error) {
     return (
       <div className="text-center bg-red-100 text-red-700 border border-red-300 px-4 py-2 rounded shadow-sm">
-        {error}
+        {`${error}, Please try again later. If the issue persists, please contact us at `}
+        <a
+          href="mailto:support@dashboardapp.com"
+          className="underline text-red-800 font-medium"
+        >
+          support@dashboardapp.com
+        </a>
+        .
       </div>
     );
   }
