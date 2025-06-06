@@ -1,14 +1,14 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
 
 export type Product = {
   id: number;
   title: string;
-  category: string
+  category: string;
   price: number;
   brand: string;
   thumbnail: string;
-  rating: string
+  rating: string;
 };
 
 type Data = {
@@ -31,15 +31,26 @@ const initialState: DataState = {
 };
 
 export const fetchData = createAsyncThunk(
-  'data/fetchData',
-  async ({ skip }: { skip: number }) => {
-    const response = await axios.get(`https://dummyjson.com/products?limit=12&skip=${skip}`);
+  "data/fetchData",
+  async ({ skip = 0, search = "" }: { skip?: number; search?: string }) => {
+    const baseUrl = search
+      ? "https://dummyjson.com/products/search"
+      : "https://dummyjson.com/products";
+
+    const response = await axios.get(baseUrl, {
+      params: {
+        q: search || undefined,
+        limit: 12,
+        skip,
+      },
+    });
+
     return response.data;
   }
 );
 
 const dataSlice = createSlice({
-  name: 'data',
+  name: "data",
   initialState,
   reducers: {},
   extraReducers: (builder) => {
@@ -54,7 +65,7 @@ const dataSlice = createSlice({
       })
       .addCase(fetchData.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || 'Something went wrong';
+        state.error = action.error.message || "Something went wrong";
       });
   },
 });

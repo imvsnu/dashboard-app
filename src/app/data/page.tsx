@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchData, Product } from "./slice";
 import { RootState, AppDispatch } from "@/lib/store";
@@ -45,7 +45,6 @@ const columns: TableColumn<Product>[] = [
 
 export default function DataPage() {
   const dispatch = useDispatch<AppDispatch>();
-  const [page, setPage] = useState(1);
   const { data, loading, error } = useSelector(
     (state: RootState) => state.data
   );
@@ -53,14 +52,6 @@ export default function DataPage() {
   useEffect(() => {
     dispatch(fetchData({ skip: 0 }));
   }, [dispatch]);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center text-lg font-medium">Loading...</div>
-      </div>
-    );
-  }
 
   if (error) {
     return <div className="text-center text-red-500">{error}</div>;
@@ -74,13 +65,12 @@ export default function DataPage() {
         columns={columns}
         searchableKey="title"
         filterOptions={{ key: "category", values: CATEGORIES }}
-        pageSize={data.limit}
+        pageSize={12}
         total={data.total}
-        page={page}
-        onPageChange={(newPage, newSkip) => {
-          console.log({ newPage, newSkip });
-          setPage(newPage);
-          dispatch(fetchData({ skip: newSkip }));
+        loading={loading}
+        onSearch={(search) => dispatch(fetchData({ search: search }))}
+        onPageChange={(newSkip, search) => {
+          dispatch(fetchData({ skip: newSkip, search: search }));
         }}
       />
     </div>

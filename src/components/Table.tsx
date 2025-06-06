@@ -19,8 +19,9 @@ interface TableProps<T extends object> {
   };
   pageSize?: number;
   total: number;
-  page: number;
-  onPageChange?: (newPage: number, newSkip: number) => void;
+  loading: boolean;
+  onPageChange?: (newSkip: number, search: string) => void;
+  onSearch?: (search: string) => void;
 }
 
 export function Table<T extends object>({
@@ -29,34 +30,37 @@ export function Table<T extends object>({
   searchableKey,
   filterOptions,
   pageSize = 10,
-  total: totalPages,
+  total,
   onPageChange,
-  page = 1,
+  onSearch,
+  loading = false,
 }: TableProps<T>) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("All");
+  const [page, setPage] = useState(1);
+
+  const totalPages = useMemo(() => {
+    return Math.ceil(total / pageSize);
+  }, [total, pageSize]);
 
   const filteredData = useMemo(() => {
     let filtered = data;
-
-    if (searchableKey) {
-      filtered = filtered.filter((item) =>
-        String(item[searchableKey]).toLowerCase().includes(search.toLowerCase())
-      );
-    }
 
     if (filterOptions && filter !== "All") {
       filtered = filtered.filter((item) => item[filterOptions.key] === filter);
     }
 
     return filtered;
-  }, [data, search, filter, searchableKey, filterOptions]);
+  }, [data, filter, filterOptions]);
 
   const handlePageChange = (changeFn: (currentPage: number) => number) => {
     const newPage = changeFn(page);
+    setPage(newPage);
     if (!onPageChange) return;
-    onPageChange(newPage, (newPage - 1) * pageSize);
+    onPageChange((newPage - 1) * pageSize, search);
   };
+
+  console.log(page, totalPages);
 
   return (
     <div className="w-full space-y-4">
@@ -64,10 +68,26 @@ export function Table<T extends object>({
         {searchableKey && (
           <input
             className="border border-gray-200 px-3 py-2 rounded w-full max-w-sm"
-            placeholder={`Search by ${String(searchableKey)}...`}
+            placeholder={`Search by ${String(
+              searchableKey
+            )}... (type and press enter)`}
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
+              if (e.target.value == "") {
+                if (onSearch) {
+                  onSearch("");
+                }
+                setPage(1);
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                if (onSearch) {
+                  onSearch(search);
+                }
+                setPage(1);
+              }
             }}
           />
         )}
@@ -90,34 +110,54 @@ export function Table<T extends object>({
       </div>
 
       <table className="min-w-full bg-white border border-gray-200 shadow rounded">
-        <thead>
-          <tr className="bg-gray-100 text-left">
-            {columns.map((col) => (
-              <th
-                key={String(col.key)}
-                className={`p-3 border-b border-gray-200 text-gray-600 ${
-                  col.width ?? ""
-                }`}
-              >
-                {col.label}
-              </th>
-            ))}
-          </tr>
-        </thead>
+        {!loading && (
+          <thead>
+            <tr className="bg-gray-100 text-left">
+              {columns.map((col) => (
+                <th
+                  key={String(col.key)}
+                  className={`p-3 border-b border-gray-200 text-gray-600 ${
+                    col.width ?? ""
+                  }`}
+                >
+                  {col.label}
+                </th>
+              ))}
+            </tr>
+          </thead>
+        )}
 
         <tbody>
-          {filteredData.map((row, rowIndex) => (
-            <tr key={rowIndex} className="hover:bg-gray-50">
-              {columns.map((col) => {
-                console.log(col.key, row);
-                return (
+          {loading ? (
+            <tr>
+              <td colSpan={columns.length}>
+                <div className="flex items-center justify-center h-159">
+                  <div className="text-center text-lg font-medium">
+                    Loading...
+                  </div>
+                </div>
+              </td>
+            </tr>
+          ) : filteredData.length === 0 ? (
+            <tr>
+              <td
+                colSpan={columns.length}
+                className="p-4 text-center text-gray-500"
+              >
+                No data found.
+              </td>
+            </tr>
+          ) : (
+            filteredData.map((row, rowIndex) => (
+              <tr key={rowIndex} className="hover:bg-gray-50">
+                {columns.map((col) => (
                   <td
                     key={String(col.key)}
                     className={`p-3 border-b border-gray-200 text-gray-600 ${
                       col.width ?? ""
                     }`}
                   >
-                    {String(row[col.key]) !== "undefined" ? (
+                    {typeof row[col.key] !== "undefined" ? (
                       col.key === "rating" ? (
                         <StarRatings
                           rating={row[col.key] as number}
@@ -137,20 +177,9 @@ export function Table<T extends object>({
                       <span className="text-gray-400">N/A</span>
                     )}
                   </td>
-                );
-              })}
-            </tr>
-          ))}
-
-          {filteredData.length === 0 && (
-            <tr>
-              <td
-                colSpan={columns.length}
-                className="p-4 text-center text-gray-500"
-              >
-                No data found.
-              </td>
-            </tr>
+                ))}
+              </tr>
+            ))
           )}
         </tbody>
       </table>
