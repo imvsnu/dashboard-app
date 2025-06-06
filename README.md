@@ -12,4 +12,9 @@ live: https://jade-peony-21b7ba.netlify.app
 - npm run dev
 ```
 
+### To run tests
+```
+- npm run test
+```
+
 To make sure app is running visit http://localhost:3000
