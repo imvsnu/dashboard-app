@@ -107,7 +107,7 @@ export function Table<T extends object>({
       <div className="flex flex-wrap items-center gap-4">
         {searchableKey && (
           <input
-            className="border border-gray-300 px-3 py-2 rounded text-gray-700 w-full max-w-xs"
+            className="border border-gray-300 px-3 py-2 rounded text-gray-700 w-full max-w-xs text-sm"
             placeholder={`Search by ${String(
               searchableKey
             )}... (type and press enter)`}
@@ -121,13 +121,13 @@ export function Table<T extends object>({
           <div className="flex items-center gap-2">
             <label
               htmlFor="categoryFilter"
-              className="text-sm font-medium text-gray-700 whitespace-nowrap"
+              className="text-sm font-medium text-gray-500 whitespace-nowrap"
             >
               Filter by category
             </label>
             <select
               id="categoryFilter"
-              className="border border-gray-300 px-3 py-2 rounded text-gray-700"
+              className="border border-gray-300 px-3 py-2 rounded text-gray-700 text-sm"
               value={filter}
               onChange={handleFilterChange}
             >
@@ -166,7 +166,7 @@ export function Table<T extends object>({
               <tr>
                 <td colSpan={columns.length}>
                   <div className="flex items-center justify-center h-159">
-                    <div className="text-center text-lg font-medium">
+                    <div className="text-center text-sm text-gray-500">
                       Loading...
                     </div>
                   </div>
@@ -187,7 +187,7 @@ export function Table<T extends object>({
                   {columns.map((col) => (
                     <td
                       key={String(col.key)}
-                      className={`p-3 border-b border-gray-200 text-gray-600 ${
+                      className={`p-3 border-b border-gray-200 text-[0.9375rem] text-gray-600 ${
                         col.width ?? ""
                       }`}
                     >
@@ -201,8 +201,8 @@ export function Table<T extends object>({
         </table>
       </div>
 
-      <div className="flex justify-between items-center">
-        <span className="text-sm text-gray-600">
+      <div className="flex justify-between items-center text-sm">
+        <span className="text-sm text-gray-500">
           Page {page} of {totalPages || 1}
         </span>
         <div className="flex gap-2">

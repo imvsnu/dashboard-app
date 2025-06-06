@@ -34,9 +34,9 @@ const CATEGORIES: Product["category"][] = [
 ];
 
 const columns: TableColumn<Product>[] = [
-  { key: "id", label: "ID", width: "w-16" },
-  { key: "title", label: "Title", width: "w-24" },
-  { key: "category", label: "Category", width: "w-16" },
+  { key: "id", label: "ID", width: "w-8" },
+  { key: "title", label: "Title", width: "w-32" },
+  { key: "category", label: "Category", width: "w-8" },
   { key: "price", label: "Price", width: "w-8" },
   { key: "brand", label: "Brand", width: "w-8" },
   { key: "rating", label: "Rating", width: "w-16" },
@@ -59,7 +59,11 @@ export default function DataPage() {
   };
 
   if (error) {
-    return <div className="text-center text-red-500">{error}</div>;
+    return (
+      <div className="text-center bg-red-100 text-red-700 border border-red-300 px-4 py-2 rounded shadow-sm">
+        {error}
+      </div>
+    );
   }
 
   return (
