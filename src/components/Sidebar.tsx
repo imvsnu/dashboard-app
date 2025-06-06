@@ -2,12 +2,13 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Database, Menu } from 'lucide-react'
+import { Home, Database, Menu, Info } from 'lucide-react'
 import { useState } from 'react'
 
 const navItems = [
   { name: 'Home', href: '/', icon: Home },
   { name: 'Data', href: '/data', icon: Database },
+  { name: 'About Us', href: '/about-us', icon: Info },
 ]
 
 export default function Sidebar() {
