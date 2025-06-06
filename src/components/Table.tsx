@@ -86,7 +86,7 @@ export function Table<T extends object>({
         <StarRatings
           rating={value}
           starRatedColor="orange"
-          starDimension="20px"
+          starDimension="16px"
           starSpacing="0px"
         />
       );
