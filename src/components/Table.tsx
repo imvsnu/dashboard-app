@@ -20,12 +20,13 @@ interface TableProps<T extends object> {
   pageSize?: number;
   total: number;
   loading: boolean;
-  onPageChange?: (newSkip: number, search: string) => void;
+  onPageChange?: (skip: number, search: string, category: string) => void;
   onSearch?: (search: string) => void;
+  onFilter?: (category: string) => void;
 }
 
 export function Table<T extends object>({
-  data,
+  data: filteredData,
   columns,
   searchableKey,
   filterOptions,
@@ -34,33 +35,22 @@ export function Table<T extends object>({
   onPageChange,
   onSearch,
   loading = false,
+  onFilter
 }: TableProps<T>) {
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState("All");
+  const [filter, setFilter] = useState("");
   const [page, setPage] = useState(1);
 
   const totalPages = useMemo(() => {
     return Math.ceil(total / pageSize);
   }, [total, pageSize]);
 
-  const filteredData = useMemo(() => {
-    let filtered = data;
-
-    if (filterOptions && filter !== "All") {
-      filtered = filtered.filter((item) => item[filterOptions.key] === filter);
-    }
-
-    return filtered;
-  }, [data, filter, filterOptions]);
-
   const handlePageChange = (changeFn: (currentPage: number) => number) => {
     const newPage = changeFn(page);
     setPage(newPage);
     if (!onPageChange) return;
-    onPageChange((newPage - 1) * pageSize, search);
+    onPageChange((newPage - 1) * pageSize, search, filter);
   };
-
-  console.log(page, totalPages);
 
   return (
     <div className="w-full space-y-4">
@@ -87,6 +77,7 @@ export function Table<T extends object>({
                   onSearch(search);
                 }
                 setPage(1);
+                setFilter("");
               }
             }}
           />
@@ -97,9 +88,14 @@ export function Table<T extends object>({
             value={filter}
             onChange={(e) => {
               setFilter(e.target.value);
+              if (onFilter) {
+                onFilter(e.target.value);
+                setSearch("");
+              }
+              setPage(1);
             }}
           >
-            <option value="All">All</option>
+            <option value="">All</option>
             {filterOptions.values.map((v) => (
               <option key={v} value={v}>
                 {v}

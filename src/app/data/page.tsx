@@ -68,9 +68,14 @@ export default function DataPage() {
         pageSize={12}
         total={data.total}
         loading={loading}
-        onSearch={(search) => dispatch(fetchData({ search: search }))}
-        onPageChange={(newSkip, search) => {
-          dispatch(fetchData({ skip: newSkip, search: search }));
+        onSearch={(search) =>
+          dispatch(fetchData({ search: search }))
+        }
+        onFilter={(category) =>
+          dispatch(fetchData({ category: category }))
+        }
+        onPageChange={(skip, search, category) => {
+          dispatch(fetchData({ skip: skip, search: search, category: category }));
         }}
       />
     </div>

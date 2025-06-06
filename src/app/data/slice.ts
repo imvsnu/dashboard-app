@@ -32,10 +32,22 @@ const initialState: DataState = {
 
 export const fetchData = createAsyncThunk(
   "data/fetchData",
-  async ({ skip = 0, search = "" }: { skip?: number; search?: string }) => {
-    const baseUrl = search
-      ? "https://dummyjson.com/products/search"
-      : "https://dummyjson.com/products";
+  async ({
+    skip = 0,
+    search = "",
+    category = "",
+  }: {
+    skip?: number;
+    search?: string;
+    category?: string;
+  }) => {
+    let baseUrl = "https://dummyjson.com/products";
+
+    if (category) {
+      baseUrl = `https://dummyjson.com/products/category/${category}`;
+    } else if (search) {
+      baseUrl = "https://dummyjson.com/products/search";
+    }
 
     const response = await axios.get(baseUrl, {
       params: {
