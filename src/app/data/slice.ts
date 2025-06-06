@@ -24,7 +24,7 @@ type DataState = {
   error: string | null;
 };
 
-const initialState: DataState = {
+export const initialState: DataState = {
   data: { products: [], limit: 12, skip: 0, total: 0 },
   loading: false,
   error: null,
