@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { Table, TableColumn } from "./Table";
+import { Table, TableColumn } from ".";
 import "@testing-library/jest-dom";
 
 type Product = {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import Sidebar from './Sidebar';
+import Sidebar from '.';
 import '@testing-library/jest-dom';
 import { usePathname } from 'next/navigation';
 
